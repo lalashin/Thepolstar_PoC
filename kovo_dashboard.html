@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KOVO Executive Dashboard</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Configure Tailwind Theme -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0F172A',
+                            accent1: '#2DD4BF', // Teal
+                            accent2: '#F59E0B', // Amber
+                            surface: '#1E293B',
+                            light: '#F8FAFC',
+                            muted: '#94A3B8'
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(45, 212, 191, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(45, 212, 191, 0.1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0F172A;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Grid Transitions */
+        .widget-enter {
+            animation: fadeIn 0.4s ease-out forwards, slideUp 0.4s ease-out forwards;
+        }
+
+        .widget-exit {
+            transition: all 0.3s ease-in;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Resize Handle */
+        .resize-handle {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            width: 20px;
+            height: 20px;
+            cursor: nwse-resize;
+            z-index: 20;
+            border-bottom-right-radius: 1rem;
+            /* Match card radius */
+        }
+
+        .resize-handle::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid #586885;
+            border-bottom: 2px solid #586885;
+            transition: all 0.2s;
+        }
+
+        .resize-handle:hover::after {
+            border-color: #2DD4BF;
+            width: 10px;
+            height: 10px;
+        }
+
+        /* Prevent text selection during resize */
+        .resizing-active {
+            user-select: none;
+            cursor: nwse-resize !important;
+        }
+
+        .resizing-active iframe {
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-brand-dark text-brand-light antialiased overflow-hidden selection:bg-brand-accent1 selection:text-brand-dark">
+
+    <div id="app" class="flex flex-col md:flex-row h-screen w-full relative bg-brand-dark">
+
+        <!-- Sidebar / Bottom Nav -->
+        <aside
+            class="md:relative fixed bottom-0 left-0 w-full md:w-24 lg:w-72 h-16 md:h-full bg-slate-900/95 md:bg-slate-900 border-t md:border-t-0 md:border-r border-slate-800 flex flex-row md:flex-col transition-all duration-300 z-50 shrink-0 backdrop-blur-md md:backdrop-blur-none justify-around md:justify-start items-center md:items-stretch shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] md:shadow-none order-last md:order-first">
+
+            <!-- Logo Area (Desktop Only) -->
+            <div
+                class="hidden md:flex h-20 items-center justify-center lg:justify-start lg:px-6 border-b border-slate-800">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-accent1 to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-accent1/20 shrink-0">
+                    K
+                </div>
+                <div class="hidden lg:block ml-4 overflow-hidden whitespace-nowrap">
+                    <h1 class="font-bold text-lg tracking-wide">KOVO DATA</h1>
+                    <p class="text-xs text-brand-muted uppercase tracking-wider">Executive Suite</p>
+                </div>
+            </div>
+
+            <!-- Navigation Area -->
+            <div
+                class="flex-1 overflow-x-auto md:overflow-y-auto w-full md:w-auto flex md:block items-center justify-evenly md:justify-start md:py-6 md:px-4 no-scrollbar">
+
+                <div
+                    class="flex md:block items-center gap-1 md:gap-0 w-full md:w-auto justify-evenly md:justify-start md:mb-8">
+                    <p
+                        class="hidden lg:block text-xs font-semibold text-brand-muted uppercase tracking-wider mb-4 px-2">
+                        Dashboard Menu</p>
+
+                    <!-- Overview Button -->
+                    <button
+                        class="flex flex-col md:flex-row items-center justify-center md:justify-start p-2 md:p-3 rounded-xl bg-brand-accent1/10 text-brand-accent1 md:mb-2 transition-all group active:scale-95 md:active:scale-100">
+                        <svg class="w-6 h-6 mb-1 md:mb-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                            </path>
+                        </svg>
+                        <span class="text-[10px] md:text-base md:hidden lg:block md:ml-3 font-medium">Overview</span>
+                    </button>
+
+                    <!-- Analysis Button -->
+                    <button
+                        class="flex flex-col md:flex-row items-center justify-center md:justify-start p-2 md:p-3 rounded-xl text-brand-muted hover:bg-slate-800 hover:text-white transition-all group active:scale-95 md:active:scale-100">
+                        <svg class="w-6 h-6 mb-1 md:mb-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
+                        </svg>
+                        <span class="text-[10px] md:text-base md:hidden lg:block md:ml-3 font-medium">Analysis</span>
+                    </button>
+
+                    <!-- Mobile Hamburger / Hidden Widgets Toggle (could trigger a modal on mobile) -->
+                    <button id="mobile-menu-btn"
+                        class="md:hidden flex flex-col items-center justify-center p-2 rounded-xl text-brand-muted hover:text-white active:scale-95"
+                        onclick="document.getElementById('hidden-widgets-container').classList.toggle('hidden');">
+                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
+                        <span class="text-[10px] font-medium">Menu</span>
+                    </button>
+                </div>
+
+                <!-- Hidden Widgets Container (Collapsible on Mobile) -->
+                <div id="hidden-widgets-container"
+                    class="hidden md:block absolute md:static bottom-16 left-0 w-full bg-slate-900/95 md:bg-transparent p-4 md:p-0 border-t border-slate-800 md:border-none backdrop-blur-xl md:backdrop-blur-none rounded-t-2xl md:rounded-none shadow-2xl md:shadow-none transition-all z-50">
+                    <div class="flex justify-between items-center md:hidden mb-4">
+                        <span class="text-sm font-bold text-white">Restorable Widgets</span>
+                        <button onclick="document.getElementById('hidden-widgets-container').classList.add('hidden')"
+                            class="text-brand-muted"><svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg></button>
+                    </div>
+                    <p
+                        class="hidden lg:block text-xs font-semibold text-brand-muted uppercase tracking-wider mb-4 px-2">
+                        Restorable Widgets</p>
+                    <div id="hidden-list" class="space-y-2 max-h-48 md:max-h-none overflow-y-auto custom-scrollbar">
+                        <!-- Buttons for hidden widgets will be injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile (Desktop Only) -->
+            <div class="hidden md:block p-4 border-t border-slate-800">
+                <div class="flex items-center">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=0F172A&color=2DD4BF" alt="User"
+                        class="w-8 h-8 lg:w-10 lg:h-10 rounded-full border border-slate-600">
+                    <div class="hidden lg:block ml-3">
+                        <p class="text-sm font-semibold text-white">Administrator</p>
+                        <p class="text-xs text-brand-muted">KOVO Digital Team</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+            <!-- Background Gradients -->
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div
+                    class="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-brand-accent1/5 rounded-full blur-3xl">
+                </div>
+                <div
+                    class="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-brand-accent2/5 rounded-full blur-3xl">
+                </div>
+            </div>
+
+            <!-- Header -->
+            <header class="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 z-10 shrink-0">
+                <div class="flex items-center">
+                    <!-- Mobile Logo -->
+                    <div
+                        class="md:hidden w-8 h-8 mr-3 rounded-lg bg-gradient-to-br from-brand-accent1 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                        K</div>
+                    <div>
+                        <h2
+                            class="text-lg md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 truncate">
+                            Dashboard Overview</h2>
+                        <p id="current-date" class="text-xs md:text-sm text-brand-muted">Loading...</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <div
+                        class="hidden sm:flex px-3 md:px-4 py-1.5 md:py-2 bg-slate-800/50 rounded-full border border-slate-700/50 items-center text-xs md:text-sm text-brand-muted">
+                        <span class="w-2 h-2 rounded-full bg-brand-accent1 mr-2 animate-pulse"></span>
+                        <span class="hidden sm:inline">Live Connected</span>
+                    </div>
+                    <button
+                        class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-brand-muted hover:text-white transition-colors relative">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                            </path>
+                        </svg>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-brand-accent2 rounded-full"></span>
+                    </button>
+                    <!-- Mobile Profile Icon -->
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=0F172A&color=2DD4BF" alt="User"
+                        class="md:hidden w-8 h-8 rounded-full border border-slate-600">
+                </div>
+            </header>
+
+            <!-- Dashboard Grid Area -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 z-10 custom-scrollbar mb-16 md:mb-0">
+                <!-- Grid Layout: Responsive Breakpoints -->
+                <div id="dashboard-grid"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-min pb-20">
+                    <!-- Widgets will be injected here via JS -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modal-backdrop"
+        class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div id="modal-content"
+            class="bg-slate-900 border border-slate-700 rounded-2xl w-11/12 h-[90%] max-w-6xl shadow-2xl transform scale-95 transition-all duration-300 flex flex-col overflow-hidden relative">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-900/50">
+                <div>
+                    <h3 id="modal-title" class="text-2xl font-bold text-white">Widget Detail</h3>
+                    <p class="text-brand-muted text-sm">Deep dive analysis</p>
+                </div>
+                <button onclick="state.closeModal()"
+                    class="p-2 rounded-lg hover:bg-slate-800 text-brand-muted hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div id="modal-body" class="flex-1 p-8 overflow-y-auto">
+                <!-- Detailed content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Mock Data & Constants ---
+
+        // Colors for charts
+        const CHART_COLORS = {
+            teal: '#2DD4BF',
+            tealAlpha: 'rgba(45, 212, 191, 0.1)',
+            amber: '#F59E0B',
+            amberAlpha: 'rgba(245, 158, 11, 0.1)',
+            grid: '#334155'
+        };
+
+        // Widget Definitions
+        const INITIAL_WIDGETS = [
+            {
+                id: 'w1',
+                type: 'metric',
+                title: '어제 경기 시청률',
+                colSpan: 'lg:col-span-1',
+                data: {
+                    value: '2.4%',
+                    trend: '+0.3%',
+                    trendUp: true,
+                    label: 'vs 전일 대비',
+                    icon: 'tv'
+                }
+            },
+            {
+                id: 'w2',
+                type: 'metric',
+                title: '2025-26 시즌 평균',
+                colSpan: 'lg:col-span-1',
+                data: {
+                    value: '1.85%',
+                    trend: '-0.05%',
+                    trendUp: false,
+                    label: 'vs 지난 시즌',
+                    icon: 'chart'
+                }
+            },
+            {
+                id: 'w3',
+                type: 'list',
+                title: '남자부 주요 지표',
+                colSpan: 'lg:col-span-1',
+                data: {
+                    items: [
+                        { rank: 1, team: '대한항공', value: '78% 승률', change: 'up' },
+                        { rank: 2, team: '우리카드', value: '65% 승률', change: 'down' },
+                        { rank: 3, team: '현대캐피탈', value: '62% 승률', change: 'flat' },
+                    ]
+                }
+            },
+            {
+                id: 'w4',
+                type: 'list',
+                title: '여자부 주요 지표',
+                colSpan: 'lg:col-span-1',
+                data: {
+                    items: [
+                        { rank: 1, team: '흥국생명', value: '82% 승률', change: 'up' },
+                        { rank: 2, team: '현대건설', value: '75% 승률', change: 'up' },
+                        { rank: 3, team: 'GS칼텍스', value: '55% 승률', change: 'down' },
+                    ]
+                }
+            },
+            {
+                id: 'w6',
+                type: 'chart',
+                title: '시즌별 시청률 추이',
+                colSpan: 'lg:col-span-2 md:col-span-2 row-span-2', // Double height logic simulation via CSS class?
+                height: 'h-96',
+                data: {
+                    labels: ['R1', 'R2', 'R3', 'R4', 'R5', 'PO'],
+                    values: [1.2, 1.5, 1.8, 1.6, 2.1, 2.8],
+                    prevValues: [1.1, 1.3, 1.4, 1.5, 1.7, 2.2]
+                }
+            },
+            {
+                id: 'w5',
+                type: 'ranking',
+                title: '역대 최고 시청률 TOP 5',
+                colSpan: 'lg:col-span-1',
+                data: {
+                    list: [
+                        { match: '24-25 챔프전 5차', rate: '3.8%' },
+                        { match: '20-21 PO 3차', rate: '3.5%' },
+                        { match: '23-24 개막전', rate: '3.2%' },
+                        { match: '19-20 올스타전', rate: '3.1%' },
+                        { match: '22-23 챔프전 1차', rate: '2.9%' }
+                    ]
+                }
+            },
+            {
+                id: 'w7',
+                type: 'calendar',
+                title: '일자별 시청률',
+                colSpan: 'lg:col-span-1',
+                data: {
+                    // Mock Data for Jan 2026 (Starts Thursday)
+                    maxRate: 3.5,
+                    days: [
+                        { d: '', r: 0 }, { d: '', r: 0 }, { d: '', r: 0 }, { d: '', r: 0 }, // Sun Mon Tue Wed (Empty) - wait, Jan 1 2026 is Thu
+                        // Actually let's just mock a generic month structure that looks full
+                        // Let's assume user just wants to see the visual effect
+                        { d: 1, r: 1.2 }, { d: 2, r: 1.5 }, { d: 3, r: 2.8 },
+                        { d: 4, r: 3.1 }, { d: 5, r: 1.4 }, { d: 6, r: 1.3 }, { d: 7, r: 1.5 }, { d: 8, r: 1.9 }, { d: 9, r: 2.2 }, { d: 10, r: 2.9 },
+                        { d: 11, r: 3.2 }, { d: 12, r: 1.1 }, { d: 13, r: 1.4 }, { d: 14, r: 1.6 }, { d: 15, r: 1.8 }, { d: 16, r: 2.1 }, { d: 17, r: 2.7 },
+                        { d: 18, r: 3.5 }, { d: 19, r: 1.2 }, { d: 20, r: 1.3 }, { d: 21, r: 1.6 }, { d: 22, r: 1.9 }, { d: 23, r: 2.2 }, { d: 24, r: 3.0 },
+                        { d: 25, r: 2.8 }, { d: 26, r: 1.5 }, { d: 27, r: 1.4 }, { d: 28, r: 1.7 }, { d: 29, r: 1.9 }, { d: 30, r: 2.4 }, { d: 31, r: 2.6 }
+                    ]
+                }
+            }
+        ];
+
+        // --- State Management System ---
+        class DashboardState {
+            constructor() {
+                this.widgets = INITIAL_WIDGETS.map(w => ({ ...w, visible: true }));
+                this.listeners = [];
+                this.activeModal = null;
+            }
+
+            subscribe(listener) {
+                this.listeners.push(listener);
+            }
+
+            notify() {
+                this.listeners.forEach(fn => fn(this));
+            }
+
+            hideWidget(id) {
+                const widget = this.widgets.find(w => w.id === id);
+                if (widget) {
+                    widget.visible = false;
+                    this.notify();
+                }
+            }
+
+            showWidget(id) {
+                const widget = this.widgets.find(w => w.id === id);
+                if (widget) {
+                    widget.visible = true;
+                    this.notify();
+                }
+            }
+
+            openModal(id) {
+                this.activeModal = this.widgets.find(w => w.id === id);
+                // Directly trigger modal logic without full re-render
+                renderModalContent(this.activeModal);
+            }
+
+            closeModal() {
+                this.activeModal = null;
+                hideModalUI();
+            }
+        }
+
+        const state = new DashboardState();
+
+        // --- Render Logic ---
+
+        // --- Data Loading & Parsing ---
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            if (lines.length < 2) return [];
+            const headers = lines[0].split(',').map(h => h.trim());
+            return lines.slice(1).map(line => {
+                const values = line.split(',');
+                const obj = {};
+                headers.forEach((h, i) => {
+                    obj[h] = values[i] ? values[i].trim() : '';
+                });
+                return obj;
+            });
+        }
+
+        async function loadWidgetData() {
+            const load = async (file) => {
+                try {
+                    const res = await fetch('data/' + file);
+                    if (!res.ok) throw new Error(res.status);
+                    const text = await res.text();
+                    return parseCSV(text);
+                } catch (e) {
+                    console.warn('Failed to load data for ' + file + ' (using mock data)', e);
+                    return null;
+                }
+            };
+
+            // Load all in parallel
+            const [d1, d2, d3, d4, d5, d6, d7] = await Promise.all([
+                load('w1_daily_viewership.csv'),
+                load('w2_season_avg.csv'),
+                load('w3_men_stats.csv'),
+                load('w4_women_stats.csv'),
+                load('w5_top_ratings.csv'),
+                load('w6_season_trend.csv'),
+                load('w7_daily_calendar.csv')
+            ]);
+
+            // Update W1
+            if (d1 && d1[0]) {
+                const w = INITIAL_WIDGETS.find(x => x.id === 'w1');
+                if (w) {
+                    w.title = d1[0].title || w.title;
+                    w.data.value = d1[0].value;
+                    w.data.trend = d1[0].trend;
+                    w.data.trendUp = d1[0].trendUp === 'true';
+                    w.data.label = d1[0].label;
+                }
+            }
+
+            // Update W2
+            if (d2 && d2[0]) {
+                const w = INITIAL_WIDGETS.find(x => x.id === 'w2');
+                if (w) {
+                    w.title = d2[0].title || w.title;
+                    w.data.value = d2[0].value;
+                    w.data.trend = d2[0].trend;
+                    w.data.trendUp = d2[0].trendUp === 'true';
+                    w.data.label = d2[0].label;
+                }
+            }
+
+            // Update W3
+            if (d3) {
+                const w = INITIAL_WIDGETS.find(x => x.id === 'w3');
+                if (w) w.data.items = d3.map(r => ({ rank: parseInt(r.rank), team: r.team, value: r.value, change: r.change }));
+            }
+
+            // Update W4
+            if (d4) {
+                const w = INITIAL_WIDGETS.find(x => x.id === 'w4');
+                if (w) w.data.items = d4.map(r => ({ rank: parseInt(r.rank), team: r.team, value: r.value, change: r.change }));
+            }
+
+            // Update W5
+            if (d5) {
+                const w = INITIAL_WIDGETS.find(x => x.id === 'w5');
+                if (w) w.data.list = d5.map(r => ({ match: r.match, rate: r.rate }));
+            }
+
+            // Update W6
+            if (d6) {
+                const w = INITIAL_WIDGETS.find(x => x.id === 'w6');
+                if (w) {
+                    w.data.labels = d6.map(r => r.label);
+                    w.data.values = d6.map(r => parseFloat(r.value));
+                    w.data.prevValues = d6.map(r => parseFloat(r.prevValue));
+                }
+            }
+
+            // Update W7
+            if (d7) {
+                const w = INITIAL_WIDGETS.find(x => x.id === 'w7');
+                if (w) {
+                    const parsedDays = d7.map(r => ({ d: parseInt(r.day), r: parseFloat(r.rate) }));
+                    // Align for Jan 2026 (Starts Thursday, so 4 empty days Sun-Wed)
+                    const padding = Array.from({ length: 4 }, () => ({ d: '', r: 0 }));
+                    w.data.days = [...padding, ...parsedDays];
+                }
+            }
+        }
+
+        async function init() {
+            // Update Date
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('ko-KR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('current-date').textContent = dateStr;
+
+            // Load Data from CSVs
+            await loadWidgetData();
+
+            // Re-initialize state widgets with loaded data
+            state.widgets = INITIAL_WIDGETS.map(w => ({ ...w, visible: true }));
+
+            // Initial Render
+            state.subscribe(renderDashboard);
+            state.subscribe(renderSidebar);
+
+            renderDashboard(state);
+            renderSidebar(state);
+        }
+
+        // --- Drag & Drop Handlers ---
+        function handleDragStart(e, id) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', id);
+            e.target.classList.add('opacity-50', 'scale-95');
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('opacity-50', 'scale-95');
+            document.querySelectorAll('#dashboard-grid > div').forEach(el => {
+                el.classList.remove('border-brand-accent1', 'border-dashed', 'border-2');
+            });
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            e.currentTarget.classList.add('border-brand-accent1', 'border-dashed', 'border-2');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('border-brand-accent1', 'border-dashed', 'border-2');
+        }
+
+        function handleDrop(e, targetId) {
+            e.stopPropagation();
+            if (isResizing) return false; // Block DnD if resizing
+
+            const draggedId = e.dataTransfer.getData('text/plain');
+
+            if (draggedId !== targetId) {
+                const fromIndex = state.widgets.findIndex(w => w.id === draggedId);
+                const toIndex = state.widgets.findIndex(w => w.id === targetId);
+
+                if (fromIndex > -1 && toIndex > -1) {
+                    const item = state.widgets[fromIndex];
+                    state.widgets.splice(fromIndex, 1);
+                    const newTargetIndex = state.widgets.findIndex(w => w.id === targetId);
+
+                    if (fromIndex < toIndex) {
+                        state.widgets.splice(newTargetIndex + 1, 0, item);
+                    } else {
+                        state.widgets.splice(newTargetIndex, 0, item);
+                    }
+                    state.notify();
+                }
+            }
+            return false;
+        }
+
+        // --- Resize Handlers ---
+        let isResizing = false;
+        let resizeWidgetId = null;
+        let resizeStartX = 0;
+        let resizeStartY = 0;
+        let initialColSpan = 1;
+        let initialHeight = 0; // index or px? Using preset classes.
+
+        // Map height classes to conceptual 'rows' or just cycle them?
+        // Let's use visual calculation based on grid.
+
+        function handleResizeStart(e, id) {
+            e.stopPropagation(); // Stop DnD
+            e.preventDefault(); // Stop text selection
+
+            isResizing = true;
+            resizeWidgetId = id;
+            resizeStartX = e.clientX;
+            resizeStartY = e.clientY;
+
+            document.body.classList.add('resizing-active');
+
+            // Current State
+            const w = state.widgets.find(x => x.id === id);
+
+            // Extract current col-span number (default 1)
+            const colMatch = w.colSpan.match(/col-span-(\d+)/);
+            initialColSpan = colMatch ? parseInt(colMatch[1]) : 1;
+            if (w.colSpan.includes('lg:col-span-')) {
+                const lgMatch = w.colSpan.match(/lg:col-span-(\d+)/);
+                if (lgMatch) initialColSpan = parseInt(lgMatch[1]);
+            }
+
+            // Add global listeners
+            window.addEventListener('mousemove', handleResizeMove);
+            window.addEventListener('mouseup', handleResizeEnd);
+        }
+
+        function handleResizeMove(e) {
+            if (!isResizing || !resizeWidgetId) return;
+
+            const dx = e.clientX - resizeStartX;
+            const dy = e.clientY - resizeStartY;
+
+            // Determine grid cell width approx (screen width / 4 for desktop)
+            // Or better: measure the grid container
+            const gridEl = document.getElementById('dashboard-grid');
+            const gridWidth = gridEl.offsetWidth;
+            const colWidth = gridWidth / 4; // Approx logic for lg screen
+
+            const addedCols = Math.round(dx / colWidth);
+            const newColSpan = Math.max(1, Math.min(4, initialColSpan + addedCols));
+
+            // Height Logic (Simple toggle or threshold?)
+            // Vertical 1 unit approx 250px (h-64)
+            const rowHeight = 250;
+            const addedRows = Math.round(dy / rowHeight);
+
+            const w = state.widgets.find(x => x.id === resizeWidgetId);
+
+            // Update Column Span immediate feedback
+            // Ensure lg: prefix for desktop logic
+            w.colSpan = `lg:col-span-${newColSpan} md:col-span-${Math.min(2, newColSpan)}`;
+
+            // Update Height
+            // Base h-64. If +1 row -> h-96. If +2 -> h-[500px]?
+            // Let's stick to standard Tailwind classes for safety or arbitrary if needed
+            let baseHeightIndex = 0; // 0: h-64, 1: h-96, 2: h-[32rem]
+            if (w.height === 'h-96') baseHeightIndex = 1;
+            if (w.height === 'h-[32rem]') baseHeightIndex = 2; // custom large
+
+            let newHeightIndex = Math.max(0, Math.min(2, baseHeightIndex + addedRows));
+
+            if (newHeightIndex === 0) w.height = 'h-64';
+            else if (newHeightIndex === 1) w.height = 'h-96';
+            else if (newHeightIndex === 2) w.height = 'h-[32rem]'; // 512px
+
+            state.notify(); // Re-render
+        }
+
+        function handleResizeEnd(e) {
+            isResizing = false;
+            resizeWidgetId = null;
+            document.body.classList.remove('resizing-active');
+            window.removeEventListener('mousemove', handleResizeMove);
+            window.removeEventListener('mouseup', handleResizeEnd);
+        }
+
+        function renderDashboard(currentState) {
+            const grid = document.getElementById('dashboard-grid');
+            grid.innerHTML = ''; // Clear
+
+            const visibleWidgets = currentState.widgets.filter(w => w.visible);
+
+            visibleWidgets.forEach(w => {
+                const el = document.createElement('div');
+                // Common glass panel styling + Drag attributes
+                el.className = `glass-panel rounded-2xl p-6 relative flex flex-col widget-enter ${w.colSpan} ${w.height ? w.height : 'h-64'} cursor-move transition-all duration-200`;
+                el.setAttribute('draggable', 'true');
+
+                // Add event listeners
+                el.addEventListener('dragstart', (e) => handleDragStart(e, w.id));
+                el.addEventListener('dragend', handleDragEnd);
+                el.addEventListener('dragover', handleDragOver);
+                el.addEventListener('dragenter', handleDragEnter);
+                el.addEventListener('dragleave', handleDragLeave);
+                el.addEventListener('drop', (e) => handleDrop(e, w.id));
+
+                el.innerHTML = `
+                    <div class="flex justify-between items-start mb-4 pointer-events-none">
+                        <h3 class="text-lg font-semibold text-brand-light flex items-center gap-2">
+                            ${getIconForTitle(w.title)} ${w.title}
+                        </h3>
+                        <div class="flex items-center gap-2 pointer-events-auto">
+                            <button onclick="state.openModal('${w.id}')" class="text-brand-muted hover:text-brand-accent1 transition-colors p-1" title="확대 보기" onmousedown="event.stopPropagation()">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            </button>
+                            <button onclick="state.hideWidget('${w.id}')" class="text-brand-muted hover:text-red-400 transition-colors p-1" title="숨기기" onmousedown="event.stopPropagation()">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resize-handle" onmousedown="handleResizeStart(event, '${w.id}')"></div>
+                    <div class="flex-1 w-full overflow-hidden relative content-area-${w.id}">
+                        <!-- Content dynamic -->
+                    </div>
+                `;
+
+                // Inject specific content based on type
+                const contentArea = el.querySelector(`.content-area-${w.id}`);
+                renderWidgetContent(contentArea, w);
+
+                grid.appendChild(el);
+            });
+        }
+
+        function renderWidgetContent(container, widget, isModal = false) {
+            // Adjust sizing for modal vs widget
+            const sizeClass = isModal ? 'text-5xl' : 'text-3xl';
+
+            if (widget.type === 'metric') {
+                const isUp = widget.data.trendUp;
+                const color = isUp ? 'text-brand-accent1' : 'text-brand-accent2';
+                const trendIcon = isUp ? '▲' : '▼';
+
+                container.innerHTML = `
+                    <div class="flex flex-col h-full justify-center">
+                        <div class="font-bold text-white ${sizeClass} tracking-tight mb-2">${widget.data.value}</div>
+                        <div class="flex items-center text-sm font-medium ${color} bg-white/5 rounded-lg w-fit px-2 py-1">
+                            <span class="mr-1">${trendIcon}</span>
+                            <span>${widget.data.trend}</span>
+                            <span class="text-brand-muted ml-2 font-normal">${widget.data.label}</span>
+                        </div>
+                    </div>
+                `;
+            } else if (widget.type === 'list') {
+                container.innerHTML = `
+                    <div class="space-y-3 mt-2">
+                        ${widget.data.items.map(item => `
+                            <div class="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 transition-colors border border-slate-700/30">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded flex items-center justify-center bg-slate-700 font-bold text-xs ${item.rank === 1 ? 'text-brand-accent2' : 'text-brand-muted'}">${item.rank}</span>
+                                    <span class="font-medium">${item.team}</span>
+                                </div>
+                                <span class="text-brand-accent1 font-medium text-sm">${item.value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (widget.type === 'ranking') {
+                container.innerHTML = `
+                    <div class="flex flex-col gap-3 mt-1 h-full overflow-y-auto">
+                        ${widget.data.list.map((item, idx) => `
+                            <div class="relative pt-1">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-brand-light">${idx + 1}. ${item.match}</span>
+                                    <span class="font-bold text-brand-accent1">${item.rate}</span>
+                                </div>
+                                <div class="w-full bg-slate-700 rounded-full h-1.5">
+                                    <div class="bg-gradient-to-r from-brand-accent1 to-blue-500 h-1.5 rounded-full" style="width: ${parseFloat(item.rate) * 20}%"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (widget.type === 'calendar') {
+                const days = ['일', '월', '화', '수', '목', '금', '토'];
+                const maxRate = widget.data.maxRate || 3.5;
+
+                // Standard Layout: Month Nav Top + Grid
+                container.innerHTML = `
+                    <div class="flex flex-col h-full">
+                        <!-- Nav Header (Centered in content) -->
+                        <div class="flex items-center justify-center mb-3">
+                            <button class="p-1 hover:bg-slate-700/50 rounded-full text-brand-muted hover:text-white transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                            <span class="mx-3 font-mono font-bold text-lg tracking-wider text-brand-light">2026.01</span>
+                            <button class="p-1 hover:bg-slate-700/50 rounded-full text-brand-muted hover:text-white transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
+                        </div>
+                        
+                        <!-- Days Header -->
+                        <div class="grid grid-cols-7 mb-2 text-center">
+                            ${days.map((d, i) => `<span class="text-[10px] md:text-xs font-medium uppercase tracking-wider ${i === 0 ? 'text-red-400/80' : (i === 6 ? 'text-blue-400/80' : 'text-slate-500')}">${d}</span>`).join('')}
+                        </div>
+                        
+                        <!-- Grid -->
+                        <div class="grid grid-cols-7 gap-1.5 flex-1 content-start">
+                            ${widget.data.days.map((item, idx) => {
+                    const opacity = item.r ? Math.max(0.15, (item.r / maxRate)).toFixed(2) : 0;
+                    const bgColor = item.d ? `rgba(45, 212, 191, ${opacity})` : 'transparent';
+                    const textColor = opacity > 0.6 ? 'text-brand-dark font-bold' : 'text-white font-medium';
+
+                    return `
+                                    <div class="aspect-square rounded-md flex items-center justify-center relative group transition-all duration-300 hover:scale-105" 
+                                         style="background-color: ${bgColor}; box-shadow: ${item.d ? '0 1px 2px 0 rgba(0,0,0,0.1)' : 'none'}">
+                                        ${item.d ? `
+                                            <span class="text-xs ${textColor}">${item.d}</span>
+                                            ${item.r ? `<div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">${item.r}%</div>` : ''}
+                                        ` : ''}
+                                    </div>
+                                `;
+                }).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (widget.type === 'chart') {
+                // Must create a unique canvas id
+                const canvasId = `chart-${widget.id}-${isModal ? 'modal' : 'dash'}`;
+                container.innerHTML = `<div class="w-full h-full p-2"><canvas id="${canvasId}"></canvas></div>`;
+
+                // Need to wait for DOM update before rendering chart
+                setTimeout(() => {
+                    const ctx = document.getElementById(canvasId).getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: widget.data.labels,
+                            datasets: [
+                                {
+                                    label: 'Current Season',
+                                    data: widget.data.values,
+                                    borderColor: CHART_COLORS.teal,
+                                    backgroundColor: CHART_COLORS.tealAlpha,
+                                    borderWidth: 3,
+                                    tension: 0.4,
+                                    fill: true,
+                                    pointBackgroundColor: CHART_COLORS.brand,
+                                    pointBorderColor: CHART_COLORS.teal,
+                                    pointBorderWidth: 2
+                                },
+                                {
+                                    label: 'Previous Season',
+                                    data: widget.data.prevValues,
+                                    borderColor: CHART_COLORS.amber,
+                                    borderDash: [5, 5],
+                                    borderWidth: 2,
+                                    tension: 0.4,
+                                    pointRadius: 0
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    labels: { color: '#94A3B8', font: { family: 'Outfit' } }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                                    ticks: { color: '#94A3B8' }
+                                },
+                                x: {
+                                    grid: { display: false },
+                                    ticks: { color: '#94A3B8' }
+                                }
+                            },
+                            animation: {
+                                duration: 2000,
+                                easing: 'easeOutQuart'
+                            }
+                        }
+                    });
+                }, 50);
+            }
+        }
+
+        function renderSidebar(currentState) {
+            const container = document.getElementById('hidden-list');
+            container.innerHTML = '';
+
+            const hiddenWidgets = currentState.widgets.filter(w => !w.visible);
+
+            if (hiddenWidgets.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-600 italic px-2">모든 위젯 활성화됨</p>';
+                return;
+            }
+
+            hiddenWidgets.forEach(w => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full flex items-center justify-between p-3 rounded-xl bg-slate-800 border border-slate-700 text-brand-muted hover:border-brand-accent1 hover:text-white transition-all group';
+                btn.onclick = () => state.showWidget(w.id);
+                btn.innerHTML = `
+                    <div class="flex items-center overflow-hidden">
+                        <span class="text-brand-accent1 opacity-50 group-hover:opacity-100 mr-2">+</span>
+                        <span class="truncate text-sm font-medium w-32 text-left">${w.title}</span>
+                    </div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        // --- Modal Logic ---
+        function renderModalContent(widget) {
+            const backdrop = document.getElementById('modal-backdrop');
+            const content = document.getElementById('modal-content');
+            const body = document.getElementById('modal-body');
+            const title = document.getElementById('modal-title');
+
+            // Set Content
+            title.innerText = widget.title + " (Detailed Analysis)";
+            body.innerHTML = ''; // Clear previous
+
+            // Create a wrapper for modal content that supports grid/layout differences
+            const wrapper = document.createElement('div');
+            wrapper.className = "w-full h-full flex flex-col";
+
+            // Render basic content but "bigger"
+            renderWidgetContent(wrapper, widget, true);
+
+            // Add some "Fake" deep dive data for the modal to make it look premium
+            const deepDive = document.createElement('div');
+            deepDive.className = "mt-8 pt-8 border-t border-slate-800 grid grid-cols-2 md:grid-cols-4 gap-4";
+            deepDive.innerHTML = `
+                <div class="bg-slate-800/50 p-4 rounded-xl">
+                    <p class="text-xs text-brand-muted uppercase">Data Accuracy</p>
+                    <p class="text-xl font-bold text-white">99.9%</p>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl">
+                    <p class="text-xs text-brand-muted uppercase">Source</p>
+                    <p class="text-xl font-bold text-white">Nielsen Korea</p>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl">
+                    <p class="text-xs text-brand-muted uppercase">Last Update</p>
+                    <p class="text-xl font-bold text-white">10 mins ago</p>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl">
+                    <p class="text-xs text-brand-muted uppercase">Segment</p>
+                    <p class="text-xl font-bold text-white">All Ages</p>
+                </div>
+            `;
+            wrapper.appendChild(deepDive);
+
+            body.appendChild(wrapper);
+
+            // Show Animation
+            backdrop.classList.remove('hidden');
+            // Small delay to allow display block to apply before opacity transition
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        function hideModalUI() {
+            const backdrop = document.getElementById('modal-backdrop');
+            const content = document.getElementById('modal-content');
+
+            backdrop.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+
+            setTimeout(() => {
+                backdrop.classList.add('hidden');
+            }, 300);
+        }
+
+        function getIconForTitle(title) {
+            // Simple icon mapper based on string match
+            if (title.includes('시청률')) return '<svg class="w-5 h-5 text-brand-accent1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>';
+            if (title.includes('지표') || title.includes('순위')) return '<svg class="w-5 h-5 text-brand-accent2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>';
+            return '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>';
+        }
+
+        // Start
+        window.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+
+</html>
