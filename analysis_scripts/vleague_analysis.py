@@ -13,4 +13,4 @@ print(city_rating)
 stadium_rating = df.groupby('구단홈구장')['가구 시청률'].mean().sort_values(ascending=False)
 
 print("\n--- 홈구장별 평균 시청률 TOP 3 ---")
-print(stadium_rating.head(3))
+print(stadium_rating.head())

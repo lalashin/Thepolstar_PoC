@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    background-color: #0F172A;
+    /* brand-dark */
+    color: #F8FAFC;
+    /* brand-light */
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.glass-panel:hover {
+    border-color: rgba(45, 212, 191, 0.3);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(45, 212, 191, 0.1);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0F172A;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* Widget Transition Classes */
+.widget-enter {
+    animation: fadeIn 0.4s ease-out forwards, slideUp 0.4s ease-out forwards;
+}
+
+/* Resize Handle */
+.resize-handle {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    width: 20px;
+    height: 20px;
+    cursor: nwse-resize;
+    z-index: 20;
+    border-bottom-right-radius: 1rem;
+}
+
+.resize-handle::after {
+    content: '';
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid #586885;
+    border-bottom: 2px solid #586885;
+    transition: all 0.2s;
+}
+
+.resize-handle:hover::after {
+    border-color: #2DD4BF;
+    width: 10px;
+    height: 10px;
+}
