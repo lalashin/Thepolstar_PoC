@@ -123,21 +123,28 @@ def get_widgets_config():
             "type": "ranking",
             "title": "역대 시청률 TOP5",
             "colSpan": "lg:col-span-2",
-            "data": {
-                "viewType": "ranking_split",
-                "topRecord": {
-                    "rank": "TOP 1",
-                    "match": "흥국생명 vs 한국도로공사",
-                    "date": "2023년 4월 6일",
-                    "rate": "3.40%"
-                },
-                "list": [
-                    {"rank": "TOP2", "date": "2025년 4월 6일", "match": "흥국생명 vs 정관장", "rate": "3.08%"},
-                    {"rank": "TOP3", "date": "2024년 4월 1일", "match": "흥국생명 vs 현대건설", "rate": "2.71%"},
-                    {"rank": "TOP4", "date": "2019년 3월 25일", "match": "한국도로공사 vs 흥국생명", "rate": "2.67%"},
-                    {"rank": "TOP5", "date": "2018년 3월 28일", "match": "대한항공 vs 현대캐피탈", "rate": "2.64%"}
-                ]
-            }
+            "data": (lambda: (
+                pd.read_csv(os.path.join(DATA_DIR, "V-LEAGUE_2025_Stadium_Updated.csv"))
+                .sort_values(by="가구 시청률", ascending=False)
+                .pipe(lambda df: {
+                    "viewType": "ranking_split",
+                    "topRecord": {
+                        "rank": "TOP 1",
+                        "match": f"{df.iloc[0]['홈']} vs {df.iloc[0]['어웨이']}",
+                        "date": pd.to_datetime(df.iloc[0]['일자']).strftime("%Y년 %m월 %d일"),
+                        "rate": f"{df.iloc[0]['가구 시청률']:.2f}%"
+                    },
+                    "list": [
+                        {
+                            "rank": f"TOP{i+2}",
+                            "date": pd.to_datetime(row['일자']).strftime("%Y.%m.%d") if pd.notnull(row['일자']) else "N/A",
+                            "match": f"{row['홈']} vs {row['어웨이']}",
+                            "rate": f"{row['가구 시청률']:.2f}%" if pd.notnull(row['가구 시청률']) else "0.00%"
+                        }
+                        for i, (idx, row) in enumerate(df.iloc[1:].iterrows())
+                    ]
+                })
+            ))()
         },
         {
             "id": "w4",

@@ -42,14 +42,15 @@ const SplitRankingView = ({ data, isModal, widget, openModal }) => {
             </div>
 
             {/* Right: List */}
-            <div className="flex-[2] flex flex-col">
+            <div className="flex-[2] flex flex-col min-h-0">
                 {/* Header / Expand Button */}
-                <div className="flex justify-end mb-2 h-6 items-center">
-                    {!isModal && (
+                {!isModal && (
+                    <div className="flex justify-end mb-2 h-6 items-center flex-shrink-0">
                         <button
                             onClick={() => {
                                 if (openModal) {
-                                    const newTitle = widget.title ? widget.title.replace('TOP5', '전체리스트') : widget.title;
+                                    const title = widget.title || '';
+                                    const newTitle = title.includes('TOP5') ? title.replace('TOP5', '전체리스트') : title;
                                     openModal({ ...widget, title: newTitle });
                                 }
                             }}
@@ -58,15 +59,15 @@ const SplitRankingView = ({ data, isModal, widget, openModal }) => {
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
                             <span>전체보기</span>
                         </button>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 {/* List Rows */}
                 <div className="flex-1 min-h-0 flex flex-col gap-1 w-full overflow-y-auto custom-scrollbar pr-1">
                     {displayedOthers.map((item, idx) => (
-                        <div key={idx} className="grid grid-cols-[3rem_6rem_1fr_4rem] gap-2 text-xs items-center py-2 border-b border-white/5 hover:bg-white/5 transition-colors rounded px-1">
-                            <div className="font-bold text-brand-light">TOP{isModal ? idx + 2 : item.rank.replace('TOP', '')}</div>
-                            <div className="text-brand-muted tabular-nums">{item.date}</div>
+                        <div key={idx} className="grid grid-cols-[3.5rem_7rem_1fr_4rem] gap-2 text-xs items-center py-2 border-b border-white/5 hover:bg-white/5 transition-colors rounded px-1">
+                            <div className="font-bold text-brand-light whitespace-nowrap">TOP {isModal ? idx + 2 : (item.rank ? item.rank.replace('TOP', '').trim() : idx + 2)}</div>
+                            <div className="text-brand-muted tabular-nums whitespace-nowrap">{item.date}</div>
                             <div className="text-brand-light truncate text-center font-medium">{item.match}</div>
                             <div className="font-bold text-brand-accent1 text-right">{item.rate}</div>
                         </div>
@@ -74,7 +75,7 @@ const SplitRankingView = ({ data, isModal, widget, openModal }) => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default RankingWidget;
