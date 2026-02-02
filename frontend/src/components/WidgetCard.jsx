@@ -45,7 +45,7 @@ const WidgetCard = ({ widget, onDragStart, onDragOver, onDragEnter, onDragLeave,
 
     return (
         <div
-            className={`glass-panel rounded-2xl p-6 relative flex flex-col widget-enter ${colSpan} ${height ? height : 'h-64'} cursor-move transition-all duration-200 group`}
+            className={`glass-panel rounded-2xl p-6 relative flex flex-col widget-enter ${colSpan} ${(widget.data?.isComplex || widget.data?.viewType === 'season_avg' || widget.data?.viewType === 'ranking_split' || widget.data?.viewType === 'season_trend') ? 'h-auto min-h-[16rem]' : (height ? height : 'h-64')} cursor-move transition-all duration-200 group`}
             draggable={true}
             onDragStart={(e) => onDragStart(e, id)}
             onDragOver={onDragOver}
@@ -80,7 +80,7 @@ const WidgetCard = ({ widget, onDragStart, onDragOver, onDragEnter, onDragLeave,
                 }}
             ></div>
 
-            <div className="flex-1 w-full overflow-hidden relative">
+            <div className={`flex-1 w-full relative ${(widget.data?.isComplex || widget.data?.viewType === 'season_avg' || widget.data?.viewType === 'ranking_split' || widget.data?.viewType === 'season_trend') ? '' : 'overflow-hidden'}`}>
                 {renderContent()}
             </div>
         </div>

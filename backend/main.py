@@ -64,45 +64,88 @@ def get_widgets_config():
         {
             "id": "w1",
             "type": "metric",
-            "title": d1[0]['title'] if d1 and 'title' in d1[0] else "어제 경기 시청률",
-            "colSpan": "lg:col-span-1",
+            "title": "어제경기 시청률",
+            "colSpan": "lg:col-span-2",
             "data": {
-                "value": d1[0]['value'] if d1 else "2.4%",
-                "trend": d1[0]['trend'] if d1 else "+0.3%",
-                "trendUp": str(d1[0]['trendUp']).lower() == 'true' if d1 else True,
-                "label": d1[0]['label'] if d1 else "vs 전일 대비",
-                "icon": "tv"
+                "isComplex": True,
+                "date": "2025.01.29",
+                "section1": {
+                    "title": "어제경기 시청률",
+                    "headers": ["구분", "채널", "대전", "전체", "CATV", "시청자수"], 
+                    "rows": [
+                        {"category": "프로배구", "channel": "KBS N", "match": "대한항공 vs 현대캐피탈", "total": "1.24%", "catv": "1.10%", "viewers": "150,000"},
+                        {"category": "프로배구", "channel": "SBS Sports", "match": "OK금융그룹 vs KB손해보험", "total": "0.98%", "catv": "0.90%", "viewers": "120,000"},
+                        {"category": "여자부", "channel": "KBS N", "match": "흥국생명 vs IBK기업은행", "total": "1.85%", "catv": "1.78%", "viewers": "210,000"},
+                        {"category": "여자부", "channel": "SBS Sports", "match": "현대건설 vs GS칼텍스", "total": "1.50%", "catv": "1.45%", "viewers": "180,000"}
+                    ]
+                },
+                "section2": {
+                    "title": "동시간대 타 종목 시청률",
+                    "headers": ["구분", "채널", "대전", "전체", "CATV"],
+                    "rows": [
+                        {"category": "농구", "channel": "SPOTV", "match": "KBL 경기", "total": "0.40%", "catv": "0.38%"},
+                        {"category": "배구", "channel": "KBS", "match": "V-League 재방", "total": "0.30%", "catv": "0.29%"},
+                        {"category": "야구", "channel": "MBC Sports", "match": "KBO 하이라이트", "total": "0.80%", "catv": "0.75%"},
+                        {"category": "골프", "channel": "JTBC Golf", "match": "PGA 투어", "total": "0.50%", "catv": "0.48%"},
+                        {"category": "축구", "channel": "tvN Sports", "match": "아시안컵 재방", "total": "1.20%", "catv": "1.15%"}
+                    ]
+                }
             }
         },
         {
             "id": "w2",
             "type": "metric",
-            "title": d2[0]['title'] if d2 and 'title' in d2[0] else "2025-26 시즌 평균",
-            "colSpan": "lg:col-span-1",
+            "title": "2025~2026시즌 평균 시청률",
+            "colSpan": "lg:col-span-2",
             "data": {
-                "value": d2[0]['value'] if d2 else "1.85%",
-                "trend": d2[0]['trend'] if d2 else "-0.05%",
-                "trendUp": str(d2[0]['trendUp']).lower() == 'true' if d2 else False,
-                "label": d2[0]['label'] if d2 else "vs 지난 시즌",
-                "icon": "chart"
+                "viewType": "season_avg",
+                "season": "2025~2026",
+                "currentRate": "0.98%",
+                "trend": "0.05%",
+                "trendUp": True,
+                "comparison": "vs 2024~2025",
+                "topRankings": [
+                    {"rank": 1, "season": "2023-2024", "rate": "1.22%"},
+                    {"rank": 2, "season": "2024-2025", "rate": "1.15%"},
+                    {"rank": 3, "season": "2021-2022", "rate": "1.12%"},
+                    {"rank": 4, "season": "2020-2021", "rate": "1.08%"},
+                    {"rank": 5, "season": "2018-2019", "rate": "1.02%"},
+                    {"rank": 6, "season": "2017-2018", "rate": "0.99%"},
+                    {"rank": 7, "season": "2016-2017", "rate": "0.95%"},
+                    {"rank": 8, "season": "2015-2016", "rate": "0.92%"},
+                    {"rank": 9, "season": "2012-2013", "rate": "0.88%"},
+                    {"rank": 10, "season": "2011-2012", "rate": "0.85%"}
+                ]
             }
         },
         {
             "id": "w3",
-            "type": "list",
-            "title": "남자부 주요 지표",
+            "type": "metric",
+            "title": "남자부",
             "colSpan": "lg:col-span-1",
             "data": {
-                "items": d3 if d3 else []
+                "viewType": "season_avg",
+                "season": "2025~2026",
+                "currentRate": "0.55%",
+                "trend": "0.02%",
+                "trendUp": True,
+                "comparison": "vs 2024~2025",
+                "topRankings": [] 
             }
         },
         {
             "id": "w4",
-            "type": "list",
-            "title": "여자부 주요 지표",
+            "type": "metric",
+            "title": "여자부",
             "colSpan": "lg:col-span-1",
             "data": {
-                "items": d4 if d4 else []
+                "viewType": "season_avg",
+                "season": "2025~2026",
+                "currentRate": "1.05%",
+                "trend": "0.12%",
+                "trendUp": True,
+                "comparison": "vs 2024~2025",
+                "topRankings": []
             }
         },
         {
@@ -120,10 +163,27 @@ def get_widgets_config():
         {
             "id": "w5",
             "type": "ranking",
-            "title": "역대 최고 시청률 TOP 5",
-            "colSpan": "lg:col-span-1",
+            "title": "역대 시청률 TOP5",
+            "colSpan": "lg:col-span-2",
             "data": {
-                "list": d5 if d5 else []
+                "viewType": "ranking_split",
+                "top1": {
+                    "rank": 1,
+                    "match": "흥국생명 vs 한국도로공사",
+                    "date": "2023년 4월 6일",
+                    "rate": "3.40%"
+                },
+                "others": [
+                    {"rank": 2, "date": "2025년 4월 6일", "match": "흥국생명 vs 정관장", "rate": "3.08%"},
+                    {"rank": 3, "date": "2024년 4월 1일", "match": "흥국생명 vs 현대건설", "rate": "2.71%"},
+                    {"rank": 4, "date": "2019년 3월 25일", "match": "한국도로공사 vs 흥국생명", "rate": "2.67%"},
+                    {"rank": 5, "date": "2018년 3월 28일", "match": "대한항공 vs 현대캐피탈", "rate": "2.64%"},
+                    {"rank": 6, "date": "2017년 3월 15일", "match": "IBK기업은행 vs 흥국생명", "rate": "2.55%"},
+                    {"rank": 7, "date": "2016년 3월 20일", "match": "현대캐피탈 vs OK저축은행", "rate": "2.50%"},
+                    {"rank": 8, "date": "2015년 3월 10일", "match": "삼성화재 vs OK저축은행", "rate": "2.45%"},
+                    {"rank": 9, "date": "2014년 3월 05일", "match": "GS칼텍스 vs IBK기업은행", "rate": "2.40%"},
+                    {"rank": 10, "date": "2013년 3월 12일", "match": "삼성화재 vs 대한항공", "rate": "2.35%"}
+                ]
             }
         },
         {
