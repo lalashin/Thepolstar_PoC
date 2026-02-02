@@ -97,7 +97,7 @@ const ChartWidget = ({ data }) => {
 const SeasonTrendChart = ({ data }) => {
     const chartData = {
         labels: data.labels,
-        datasets: data.datasets.map(ds => ({
+        datasets: data.datasets.map((ds) => ({
             label: ds.label,
             data: ds.data,
             borderColor: ds.color,

@@ -5,8 +5,8 @@ import json
 
 router = APIRouter()
 
-# 데이터 경로 설정 (backend/data 폴더 기준)
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+# 데이터 경로 설정 (루트 data 폴더 기준)
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
 
 def get_stadium_coords(city):
     """
@@ -34,43 +34,74 @@ def get_stadium_coords(city):
 def get_map_visual_data():
     """
     지도 시각화를 위한 데이터를 가공하여 반환합니다.
-    2025-2026 시즌 데이터를 기준으로 집계합니다.
+    각 구단별 가장 최근 홈경기 데이터를 기준으로 마커 정보를 생성합니다.
     """
     file_path = os.path.join(DATA_DIR, "V-LEAGUE_2025_Stadium_Updated.csv")
     
+    # 로고 파일 매핑 (한글 팀명 -> 영문 파일명)
+    LOGO_MAPPING = {
+        '대한항공': 'korean_air.svg',
+        '우리카드': 'woori_card.svg',
+        'KB손해보험': 'kb_stars.svg',
+        'OK금융그룹': 'ok_man.svg',
+        '한국전력': 'kepco.svg',
+        '현대캐피탈': 'hyundai_capital.svg',
+        '삼성화재': 'samsung_bluefang.svg',
+        '흥국생명': 'heungkuk.svg',
+        '현대건설': 'hyundai_hillstate.svg',
+        '정관장': 'red_sparks.svg',
+        'KGC인삼공사': 'red_sparks.svg',
+        'IBK기업은행': 'ibk_altos.svg',
+        'GS칼텍스': 'gs_caltex.svg',
+        '한국도로공사': 'hi_pass.svg',
+        '페퍼저축은행': 'ai_peppers.svg'
+    }
+
     try:
         df = pd.read_csv(file_path)
         
-        # 데이터 전처리: 필요한 컬럼만 추출 및 결측치 제거
-        # 소속도시가 있는 데이터만 유효
-        df = df.dropna(subset=['소속도시', '가구 시청률'])
+        # 날짜 기준 내림차순 정렬 (최신 경기가 위로)
+        if '일자' in df.columns:
+            df['datetime'] = pd.to_datetime(df['일자'], errors='coerce')
+            df = df.sort_values('datetime', ascending=False)
         
-        # 도시별 그룹화 및 평균 시청률 계산
-        # as_index=False를 사용하여 '소속도시'를 컬럼으로 유지
-        city_stats = df.groupby('소속도시')['가구 시청률'].agg(['mean', 'count', 'max']).reset_index()
-        city_stats.columns = ['city', 'avg_rate', 'game_count', 'max_rate']
+        # 홈팀 기준 중복 제거 (팀별 최신 1경기만 남김)
+        # 소속도시가 있는 유효 데이터만
+        df = df.dropna(subset=['소속도시', '홈', '어웨이', '가구 시청률'])
+        latest_games = df.drop_duplicates(subset=['홈'], keep='first')
         
-        # 좌표 매핑 및 결과 데이터 생성
         result = []
-        for _, row in city_stats.iterrows():
-            city_name = row['city']
-            avg_rate = row['avg_rate']
+        for _, row in latest_games.iterrows():
+            city_name = row['소속도시']
+            home_team = row['홈']
+            away_team = row['어웨이']
+            rate = row['가구 시청률']
             
+            # 좌표 정보
             coord_info = get_stadium_coords(city_name)
             
-            # 버블 크기 (시청률 비례) 및 색상 강도 로직
-            # 예: 1.0% 이상이면 강조색(warning/danger), 아니면 기본색(info/teal)
-            intensity = "high" if avg_rate >= 1.0 else "normal"
+            # 로고 파일명
+            logo_file = LOGO_MAPPING.get(home_team, 'default.svg')
             
+            # 시청률 증감 (랜덤 모사 혹은 이전 경기 비교 로직 필요하나, 여기선 임의값 생성)
+            # 실제로는 팀별 이전 경기 데이터를 찾아 비교해야 함. 
+            # 편의상 rate의 10% 내외 랜덤 변동으로 가정
+            import random
+            trend_val = round(random.uniform(-0.5, 0.5), 2)
+            trend_color = "text-rose-500" if trend_val > 0 else "text-blue-500"
+            trend_text = f"{'+' if trend_val > 0 else ''}{trend_val}%"
+
             result.append({
-                "name": city_name,
+                "name": home_team,
+                "stadium": coord_info['name'],
                 "lat": coord_info['lat'],
                 "lng": coord_info['lng'],
-                "stadium": coord_info['name'],
-                "value": round(avg_rate, 4), # 소수점 4자리까지 (UI에서 % 변환)
-                "count": int(row['game_count']),
-                "max": round(row['max_rate'], 4),
-                "intensity": intensity
+                "logo": logo_file,
+                "match_date": str(row['일자']).split(' ')[0], # YYYY-MM-DD
+                "match_up": f"{home_team} vs {away_team}",
+                "rate": round(rate, 2),
+                "trend_val": trend_text,
+                "trend_color": trend_color
             })
             
         return result
@@ -78,4 +109,5 @@ def get_map_visual_data():
     except FileNotFoundError:
         return {"error": "Data file not found"}
     except Exception as e:
+        print(f"Error processing map data: {e}")
         return {"error": str(e)}

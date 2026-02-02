@@ -6,7 +6,7 @@ import RankingWidget from './widgets/RankingWidget';
 import CalendarWidget from './widgets/CalendarWidget';
 import ChartWidget from './widgets/ChartWidget';
 import MapWidget from './widgets/MapWidget';
-import PyramidWidget from './widgets/PyramidWidget';
+
 
 const Modal = () => {
     const { modalWidget, closeModal } = useDashboard();
@@ -22,7 +22,7 @@ const Modal = () => {
             case 'calendar': return <CalendarWidget {...props} />;
             case 'chart': return <ChartWidget {...props} />;
             case 'map': return <MapWidget {...props} />;
-            case 'pyramid': return <PyramidWidget {...props} />;
+
             default: return <div>Unknown</div>;
         }
     };
@@ -50,25 +50,27 @@ const Modal = () => {
                         {renderContent()}
                     </div>
 
-                    {/* Fake Deep Dive Data */}
-                    <div className="mt-8 pt-8 border-t border-slate-800 grid grid-cols-2 md:grid-cols-4 gap-4 flex-shrink-0">
-                        <div className="bg-slate-800/50 p-4 rounded-xl">
-                            <p className="text-xs text-brand-muted uppercase">Data Accuracy</p>
-                            <p className="text-xl font-bold text-white">99.9%</p>
+                    {/* Fake Deep Dive Data - Hide for Calendar to give more space */}
+                    {modalWidget.type !== 'calendar' && (
+                        <div className="mt-8 pt-8 border-t border-slate-800 grid grid-cols-2 md:grid-cols-4 gap-4 flex-shrink-0">
+                            <div className="bg-slate-800/50 p-4 rounded-xl">
+                                <p className="text-xs text-brand-muted uppercase">Data Accuracy</p>
+                                <p className="text-xl font-bold text-white">99.9%</p>
+                            </div>
+                            <div className="bg-slate-800/50 p-4 rounded-xl">
+                                <p className="text-xs text-brand-muted uppercase">Source</p>
+                                <p className="text-xl font-bold text-white">Nielsen Korea</p>
+                            </div>
+                            <div className="bg-slate-800/50 p-4 rounded-xl">
+                                <p className="text-xs text-brand-muted uppercase">Last Update</p>
+                                <p className="text-xl font-bold text-white">10 mins ago</p>
+                            </div>
+                            <div className="bg-slate-800/50 p-4 rounded-xl">
+                                <p className="text-xs text-brand-muted uppercase">Segment</p>
+                                <p className="text-xl font-bold text-white">All Ages</p>
+                            </div>
                         </div>
-                        <div className="bg-slate-800/50 p-4 rounded-xl">
-                            <p className="text-xs text-brand-muted uppercase">Source</p>
-                            <p className="text-xl font-bold text-white">Nielsen Korea</p>
-                        </div>
-                        <div className="bg-slate-800/50 p-4 rounded-xl">
-                            <p className="text-xs text-brand-muted uppercase">Last Update</p>
-                            <p className="text-xl font-bold text-white">10 mins ago</p>
-                        </div>
-                        <div className="bg-slate-800/50 p-4 rounded-xl">
-                            <p className="text-xs text-brand-muted uppercase">Segment</p>
-                            <p className="text-xl font-bold text-white">All Ages</p>
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>

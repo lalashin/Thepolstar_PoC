@@ -120,6 +120,27 @@ def get_widgets_config():
         },
         {
             "id": "w3",
+            "type": "ranking",
+            "title": "역대 시청률 TOP5",
+            "colSpan": "lg:col-span-2",
+            "data": {
+                "viewType": "ranking_split",
+                "topRecord": {
+                    "rank": "TOP 1",
+                    "match": "흥국생명 vs 한국도로공사",
+                    "date": "2023년 4월 6일",
+                    "rate": "3.40%"
+                },
+                "list": [
+                    {"rank": "TOP2", "date": "2025년 4월 6일", "match": "흥국생명 vs 정관장", "rate": "3.08%"},
+                    {"rank": "TOP3", "date": "2024년 4월 1일", "match": "흥국생명 vs 현대건설", "rate": "2.71%"},
+                    {"rank": "TOP4", "date": "2019년 3월 25일", "match": "한국도로공사 vs 흥국생명", "rate": "2.67%"},
+                    {"rank": "TOP5", "date": "2018년 3월 28일", "match": "대한항공 vs 현대캐피탈", "rate": "2.64%"}
+                ]
+            }
+        },
+        {
+            "id": "w4",
             "type": "metric",
             "title": "남자부",
             "colSpan": "lg:col-span-1",
@@ -134,7 +155,7 @@ def get_widgets_config():
             }
         },
         {
-            "id": "w4",
+            "id": "w5",
             "type": "metric",
             "title": "여자부",
             "colSpan": "lg:col-span-1",
@@ -151,38 +172,38 @@ def get_widgets_config():
         {
             "id": "w6",
             "type": "chart",
-            "title": "시즌별 시청률 추이",
-            "colSpan": "lg:col-span-4 md:col-span-2 row-span-2",
-            "height": "h-96",
+            "title": "시즌 별 시청률 (경기별 추이)",
+            "colSpan": "lg:col-span-3",
             "data": {
-                "labels": [r['label'] for r in d6] if d6 else [],
-                "values": [float(r['value']) for r in d6] if d6 else [],
-                "prevValues": [float(r['prevValue']) for r in d6] if d6 else []
-            }
-        },
-        {
-            "id": "w5",
-            "type": "ranking",
-            "title": "역대 시청률 TOP5",
-            "colSpan": "lg:col-span-2",
-            "data": {
-                "viewType": "ranking_split",
-                "top1": {
-                    "rank": 1,
-                    "match": "흥국생명 vs 한국도로공사",
-                    "date": "2023년 4월 6일",
-                    "rate": "3.40%"
-                },
-                "others": [
-                    {"rank": 2, "date": "2025년 4월 6일", "match": "흥국생명 vs 정관장", "rate": "3.08%"},
-                    {"rank": 3, "date": "2024년 4월 1일", "match": "흥국생명 vs 현대건설", "rate": "2.71%"},
-                    {"rank": 4, "date": "2019년 3월 25일", "match": "한국도로공사 vs 흥국생명", "rate": "2.67%"},
-                    {"rank": 5, "date": "2018년 3월 28일", "match": "대한항공 vs 현대캐피탈", "rate": "2.64%"},
-                    {"rank": 6, "date": "2017년 3월 15일", "match": "IBK기업은행 vs 흥국생명", "rate": "2.55%"},
-                    {"rank": 7, "date": "2016년 3월 20일", "match": "현대캐피탈 vs OK저축은행", "rate": "2.50%"},
-                    {"rank": 8, "date": "2015년 3월 10일", "match": "삼성화재 vs OK저축은행", "rate": "2.45%"},
-                    {"rank": 9, "date": "2014년 3월 05일", "match": "GS칼텍스 vs IBK기업은행", "rate": "2.40%"},
-                    {"rank": 10, "date": "2013년 3월 12일", "match": "삼성화재 vs 대한항공", "rate": "2.35%"}
+                "viewType": "season_trend",
+                "season": "2025-2026",
+                "labels": ["2015-2016", "2016-2017", "2017-2018", "2018-2019", "2019-2020", "2020-2021", "2021-2022", "2022-2023", "2023-2024", "2024-2025", "2025-2026"],
+                "datasets": [
+                    {
+                        "label": "배구 - KBSN스포츠: 흥국생명 vs 현대건설",
+                        "data": [0.6, 0.7, 0.8, 0.9, 1.1, 1.0, 0.9, 1.0, 0.8, 0.6, 0.4],
+                        "color": "#8B5CF6"
+                    },
+                    {
+                        "label": "배구 - SBS Sports: 현대캐피탈 vs 대한항공",
+                        "data": [0.55, 0.65, 0.75, 0.85, 1.0, 1.1, 1.05, 0.95, 0.85, 0.7, 0.5],
+                        "color": "#10B981"
+                    },
+                    {
+                        "label": "KBO - MBC SPORTS+: 삼성 vs SSG",
+                        "data": [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.1, 1.2, 1.1, 0.9, 0.7],
+                        "color": "#F59E0B"
+                    },
+                    {
+                        "label": "농구 - SPOTV: 두산 vs KIA",
+                        "data": [0.3, 0.4, 0.5, 0.55, 0.6, 0.7, 0.75, 0.8, 0.7, 0.6, 0.5],
+                        "color": "#EF4444"
+                    },
+                    {
+                        "label": "농구 - skySports: BNK vs 하나원큐",
+                        "data": [0.2, 0.3, 0.35, 0.4, 0.5, 0.55, 0.6, 0.55, 0.5, 0.4, 0.35],
+                        "color": "#EC4899"
+                    }
                 ]
             }
         },
@@ -192,33 +213,34 @@ def get_widgets_config():
             "title": "일자별 시청률",
             "colSpan": "lg:col-span-1",
             "data": {
+                "currentMonth": "2026.01",
                 "maxRate": 3.5,
-                "days": d7 if d7 else []
+                "days": [
+                    {"d": "", "r": 0}, {"d": "", "r": 0}, {"d": "", "r": 0}, {"d": "", "r": 0},
+                    {"d": 1, "r": 0.85}, {"d": 2, "r": 0.92}, {"d": 3, "r": 1.45},
+                    {"d": 4, "r": 2.10}, {"d": 5, "r": 0.75}, {"d": 6, "r": 0.88}, {"d": 7, "r": 1.10}, {"d": 8, "r": 1.05}, {"d": 9, "r": 1.25}, {"d": 10, "r": 1.80},
+                    {"d": 11, "r": 2.45}, {"d": 12, "r": 0.65}, {"d": 13, "r": 0.90}, {"d": 14, "r": 1.15}, {"d": 15, "r": 1.30}, {"d": 16, "r": 1.50}, {"d": 17, "r": 2.20},
+                    {"d": 18, "r": 2.85}, {"d": 19, "r": 0.70}, {"d": 20, "r": 0.95}, {"d": 21, "r": 1.20}, {"d": 22, "r": 1.45}, {"d": 23, "r": 1.60}, {"d": 24, "r": 2.15},
+                    {"d": 25, "r": 3.05}, {"d": 26, "r": 0.80}, {"d": 27, "r": 0.92}, {"d": 28, "r": 1.18}, {"d": 29, "r": 1.35}, {"d": 30, "r": 1.55}, {"d": 31, "r": 1.95}
+                ]
             }
         },
         {
             "id": "w8",
             "type": "map",
             "title": "지역별 시청률 히트맵",
-            "colSpan": "lg:col-span-2 md:col-span-2 row-span-2",
+            "colSpan": "lg:col-span-4",
             "height": "h-96",
             "data": {} 
         },
-        {
-            "id": "w9",
-            "type": "pyramid",
-            "title": "남녀부 시청률 분포 (피라미드)",
-            "colSpan": "lg:col-span-2 md:col-span-2 row-span-2",
-            "height": "h-96",
-            "data": {}
-        }
+
     ]
     return widgets
 
 # --- Router Registration ---
-from routers import map_analytics, gender_distribution
+from routers import map_analytics
 app.include_router(map_analytics.router)
-app.include_router(gender_distribution.router)
+
 
 # --- Serve Static Files (Production Build Support) ---
 # If 'dist' exists, serve it. Otherwise, rely on separate dev server

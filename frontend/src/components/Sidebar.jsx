@@ -4,6 +4,9 @@ import { useDashboard } from '../context/DashboardContext';
 const Sidebar = () => {
     const { widgets, toggleWidgetVisibility } = useDashboard();
     const [hiddenListOpen, setHiddenListOpen] = useState(false);
+    const [headerDropdownOpen, setHeaderDropdownOpen] = useState(false);
+    const [selectedHeader, setSelectedHeader] = useState('KOVO DATA');
+    const headerOptions = ['KOVO DATA', 'KBO DATA', 'KBL DATA', 'K-LEAGUE'];
 
     const hiddenWidgets = widgets.filter(w => !w.visible);
 
@@ -15,9 +18,38 @@ const Sidebar = () => {
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-accent1 to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-accent1/20 shrink-0">
                     K
                 </div>
-                <div className="hidden lg:block ml-4 overflow-hidden whitespace-nowrap">
-                    <h1 className="font-bold text-lg tracking-wide">KOVO DATA</h1>
-                    <p className="text-xs text-brand-muted uppercase tracking-wider">Executive Suite</p>
+                <div className="hidden lg:block ml-4 relative">
+                    <button
+                        onClick={() => setHeaderDropdownOpen(!headerDropdownOpen)}
+                        className="flex items-center gap-2 font-bold text-lg tracking-wide text-white hover:text-brand-accent1 transition-colors focus:outline-none"
+                    >
+                        {selectedHeader}
+                        <svg className={`w-4 h-4 transition-transform duration-200 text-slate-400 ${headerDropdownOpen ? 'rotate-180 text-brand-accent1' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <p className="text-xs text-brand-muted uppercase tracking-wider mt-0.5">Executive Suite</p>
+
+                    {/* Custom Dropdown */}
+                    {headerDropdownOpen && (
+                        <>
+                            <div className="fixed inset-0 z-40" onClick={() => setHeaderDropdownOpen(false)}></div>
+                            <div className="absolute top-full left-0 mt-2 w-48 bg-slate-800/95 backdrop-blur-xl rounded-xl border border-slate-700 shadow-2xl overflow-hidden z-50 flex flex-col animate-in fade-in zoom-in-95 duration-100 origin-top-left">
+                                {headerOptions.map(opt => (
+                                    <button
+                                        key={opt}
+                                        onClick={() => {
+                                            setSelectedHeader(opt);
+                                            setHeaderDropdownOpen(false);
+                                        }}
+                                        className={`text-left px-4 py-3 text-sm font-medium transition-all hover:bg-slate-700/80 ${selectedHeader === opt ? 'text-brand-accent1 bg-brand-accent1/5' : 'text-slate-300'}`}
+                                    >
+                                        {opt}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 

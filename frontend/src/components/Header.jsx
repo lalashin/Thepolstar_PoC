@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 const Header = () => {
-    const [dateStr, setDateStr] = useState('Loading...');
-
-    useEffect(() => {
+    const [dateStr] = useState(() => {
         const now = new Date();
         // Korean locale format as per original
-        setDateStr(now.toLocaleDateString('ko-KR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
-    }, []);
+        return now.toLocaleDateString('ko-KR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    });
 
     return (
         <header className="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 z-10 shrink-0">
